@@ -1,0 +1,69 @@
+# ==============================================================================
+# MaxViT Prototype Learning Config - Optimized Version
+# 在 baseline 基础上整合原型学习模块 (参考 maxvit_proto_2 优化)
+# ==============================================================================
+
+experiment_name: "maxvit_proto_sim_plus"
+
+# 路径配置
+paths:
+  project_root: "www/WXproject"
+  image_root: "www/WXproject/Image/images"
+  csv_entry: "www/WXproject/data/Data_Entry_2017_v2020.csv"
+  test_list: "demo/hello/maxvit_proto_sim_plus/data/test_list.txt"
+  train_val_list: "demo/hello/maxvit_proto_sim_plus/data/train_val_list.txt"
+  output_dir: "demo/hello/maxvit_proto_sim_plus/output"
+
+# 模型配置
+model:
+  backbone: "maxvit_tiny_tf_224.in1k"
+  pretrained: true
+  img_size: 224
+  num_classes: 14
+
+# 训练配置
+training:
+  stage2_epochs: 35                  # 增加到 35 轮，更充分优化
+  batch_size: 48
+  accumulation_steps: 2
+  lr: 2e-5
+  lr_min: 1e-6
+  weight_decay: 5e-3
+  dropout: 0.4
+  num_workers: 8
+  use_amp: true
+  warmup_epochs: 2
+  early_stopping_patience: 10         # 增加到 10，避免过早停止
+  early_stopping_min_delta: 0.0005   # 缩小阈值，捕捉细微提升
+
+# 原型学习配置
+prototype:
+  K: 3                               # 每个类别的原型数量
+  feat_dim: 256                      # 特征维度
+  ema_momentum: 0.99                 # EMA 更新动量
+  loss_weight: 0.08                  # 降低权重，防止干扰主任务
+  diversity_weight: 0.01             # 多样性损失权重
+  temperature: 0.1                   # 原型损失温度
+  normalize_features: true          # 特征归一化
+  extract_batch_size: 128            # 特征提取批次大小
+  warmup_epochs: 5                   # BCE-only 预热轮数
+  ramp_epochs: 15                    # 原型权重线性增长轮数
+
+# PGA (原型引导注意力) 配置
+pga:
+  use_pga: true                      # 是否启用 PGA
+  K: 3                               # PGA 中使用的原型数量
+  temperature: 0.1                    # PGA 温度参数
+
+# 评估配置
+evaluation:
+  batch_size: 64
+  threshold: 0.2
+
+# ASL 非对称损失配置
+loss:
+  type: "ASL"           # ASL / Focal / BCE
+  gamma_neg: 4          # 负样本聚焦参数 (降低简单负样本影响)
+  gamma_pos: 0          # 正样本聚焦参数 (0表示不加惩罚)
+  alpha: 0.5            # 正样本权重 (0.5适合imbalanced数据)
+  clip: 0.05            # 概率裁剪下界 (防止极端值)

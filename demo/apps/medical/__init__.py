@@ -1,0 +1,1 @@
+# Medical module initialization
