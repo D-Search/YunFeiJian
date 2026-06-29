@@ -149,20 +149,7 @@ def my_view(request):
     raise ValidationError("参数验证失败")
 ```
 
-## 兼容旧代码
 
-原有的导入路径仍然可用：
-
-```python
-# 旧代码
-from hello.models import UserProfile, ReportRecord
-from hello.disease import CLS_14
-
-# 新代码（推荐）
-from apps.user.models import UserProfile
-from apps.report.models import ReportRecord
-from apps.medical.diseases import CLS_14
-```
 
 ## 依赖关系
 
@@ -200,47 +187,10 @@ from apps.medical.diseases import CLS_14
         └────────────────────────┘
 ```
 
-## 迁移指南
 
-### 从 hello.views 迁移
-
-旧代码：
-```python
-from hello.views import upload_and_analyze
-```
-
-新代码：
-```python
-from apps.report.views import upload_and_analyze
-```
-
-### 从 hello.models 迁移
-
-旧代码：
-```python
-from hello.models import ReportRecord
-```
-
-新代码：
-```python
-from apps.report.models import ReportRecord
-```
-
-### 从 hello.disease 迁移
-
-旧代码：
-```python
-from hello.disease import CLS_14
-```
-
-新代码：
-```python
-from apps.medical.diseases import CLS_14
-```
 
 ## 注意事项
 
 1. **模型懒加载**：模型在首次请求时才加载，避免Django启动阻塞
 2. **单例模式**：服务使用单例模式，避免重复创建
-3. **向后兼容**：旧导入路径仍然可用，建议逐步迁移到新路径
-4. **异常处理**：使用 `@handle_service_exception` 装饰器自动处理异常
+3. **异常处理**：使用 `@handle_service_exception` 装饰器自动处理异常
